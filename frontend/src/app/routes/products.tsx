@@ -1,4 +1,4 @@
-import { SearchBar } from '@/components/common'
+import { SearchBar, StatusFilter } from '@/components/common'
 import { ProductTable } from '@/features/products'
 
 export function ProductsRoute() {
@@ -13,8 +13,11 @@ export function ProductsRoute() {
             Manage SKU catalog, pricing, and stock movements.
           </p>
         </div>
-        <div className="w-full sm:w-80">
-          <SearchBar placeholder="Search by name or SKU..." />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <StatusFilter />
+          <div className="w-full sm:w-72">
+            <SearchBar placeholder="Search by name or SKU..." />
+          </div>
         </div>
       </div>
 

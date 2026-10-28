@@ -9,8 +9,11 @@ export interface Product {
   last_movement_at: string | null
 }
 
+export type ProductStatusFilter = 'all' | 'active' | 'inactive'
+
 export interface GetProductsParams {
   search?: string
+  status?: ProductStatusFilter | string
   page?: number
   limit?: number
 }

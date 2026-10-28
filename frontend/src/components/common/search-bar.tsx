@@ -30,18 +30,15 @@ export function SearchBar({
   const [prevUrlQuery, setPrevUrlQuery] = React.useState(urlQuery)
   const debouncedValue = useDebounce(value, debounceMs)
 
-  // Keep local input in sync if URL parameter is modified externally
   if (prevUrlQuery !== urlQuery) {
     setPrevUrlQuery(urlQuery)
     setValue(urlQuery)
   }
 
-  // Sync debounced search value to the URL query string
   React.useEffect(() => {
     const currentParam = searchParams.get(paramKey) ?? ''
     const trimmed = debouncedValue.trim()
 
-    // Don't update URL if the search value already matches the URL
     if (trimmed === currentParam) {
       return
     }

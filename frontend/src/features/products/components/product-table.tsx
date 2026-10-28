@@ -19,13 +19,19 @@ export interface ProductTableProps {
    * Optional search filter override. If omitted, uses URL ?search= query param.
    */
   search?: string
+  /**
+   * Optional status filter override. If omitted, uses URL ?status= query param.
+   */
+  status?: string
 }
 
-export function ProductTable({ search: customSearch }: ProductTableProps = {}) {
+export function ProductTable({ search: customSearch, status: customStatus }: ProductTableProps = {}) {
   const [searchParams] = useSearchParams()
   const search = customSearch ?? (searchParams.get('search')?.trim() || undefined)
+  const statusParam = customStatus ?? searchParams.get('status')?.trim()
+  const status = statusParam && statusParam !== 'all' ? statusParam : undefined
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts({ search })
+  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts({ search, status })
 
   const products = data?.data ?? []
 
@@ -93,9 +99,9 @@ export function ProductTable({ search: customSearch }: ProductTableProps = {}) {
                 colSpan={7}
                 className="h-32 text-center text-sm text-muted-foreground"
               >
-                {search ? (
+                {search || status ? (
                   <span>
-                    No products found matching <span className="font-medium text-foreground">"{search}"</span>.
+                    No products found matching your filter criteria.
                   </span>
                 ) : (
                   'No products available yet.'

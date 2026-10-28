@@ -2,6 +2,7 @@ package handler
 
 import (
 	"database/sql"
+	"fmt"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -48,7 +49,8 @@ type UpdateStockRequest struct {
 }
 
 func (h *Handler) GetProduct (w http.ResponseWriter, r *http.Request) {
-	search := r.URL.Query().Get("search")
+	search := strings.TrimSpace(r.URL.Query().Get("search"))
+	status := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("status")))
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
 
@@ -63,42 +65,52 @@ func (h *Handler) GetProduct (w http.ResponseWriter, r *http.Request) {
 		limit = l
 	}
 
-	offset := (page - 1) * limit;
+	offset := (page - 1) * limit
 
-	var err error
-	var total int
-	var rows *sql.Rows
+	var conditions []string
+	var args []any
+	argIndex := 1
 
 	if search != "" {
-		if err := h.DB.QueryRow("SELECT COUNT (*) FROM Products WHERE sku ILIKE $1 OR name ILIKE $1", "%"+search+"%").Scan(&total); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-		}
-
-		query := `SELECT p.id, p.sku, p.name, p.price, p.stock, p.is_active, p.created_at, (SELECT sm.created_at FROM stock_movements sm WHERE sm.product_id = p.id ORDER BY sm.created_at DESC LIMIT 1) AS last_movement_at FROM products p WHERE p.sku ILIKE $1 OR name ILIKE $1 ORDER BY p.id ASC LIMIT $2 OFFSET $3`
-
-		rows, err = h.DB.Query(query, "%"+search+"%", limit, offset)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-		}
-	} else {
-		if err := h.DB.QueryRow("SELECT COUNT (*) FROM Products").Scan(&total); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-		}
-
-		query := `SELECT p.id, p.sku, p.name, p.price, p.stock, p.is_active, p.created_at, (SELECT sm.created_at FROM stock_movements sm WHERE sm.product_id = p.id ORDER BY sm.created_at DESC LIMIT 1) AS last_movement_at FROM products p ORDER BY p.id ASC LIMIT $1 OFFSET $2`
-
-		rows, err = h.DB.Query(query, limit, offset)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-		}
+		conditions = append(conditions, fmt.Sprintf("(p.sku ILIKE $%d OR p.name ILIKE $%d)", argIndex, argIndex))
+		args = append(args, "%"+search+"%")
+		argIndex++
 	}
 
+	switch status {
+	case "active":
+		conditions = append(conditions, fmt.Sprintf("p.is_active = $%d", argIndex))
+		args = append(args, true)
+		argIndex++
+	case "inactive", "non-active", "non_active":
+		conditions = append(conditions, fmt.Sprintf("p.is_active = $%d", argIndex))
+		args = append(args, false)
+		argIndex++
+	}
+
+	whereClause := ""
+	if len(conditions) > 0 {
+		whereClause = "WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	countArgs := make([]any, len(args))
+	copy(countArgs, args)
+
+	var total int
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM products p %s", whereClause)
+	if err := h.DB.QueryRow(countQuery, countArgs...).Scan(&total); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	dataQuery := fmt.Sprintf(`SELECT p.id, p.sku, p.name, p.price, p.stock, p.is_active, p.created_at, (SELECT sm.created_at FROM stock_movements sm WHERE sm.product_id = p.id ORDER BY sm.created_at DESC LIMIT 1) AS last_movement_at FROM products p %s ORDER BY p.id ASC LIMIT $%d OFFSET $%d`, whereClause, argIndex, argIndex+1)
+
+	args = append(args, limit, offset)
+	rows, err := h.DB.Query(dataQuery, args...)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	defer rows.Close()
 
 	products := make([]Product, 0)
@@ -384,7 +396,7 @@ func (h *Handler) UpdateStock (w http.ResponseWriter, r *http.Request) {
 	} else {
 		if currentStock < req.Qty {
             w.Header().Set("Content-Type", "application/json")
-            w.WriteHeader(http.StatusConflict) // HTTP 409
+            w.WriteHeader(http.StatusConflict) 
             json.NewEncoder(w).Encode(map[string]any{
                 "error": map[string]any{
 					"code": "INSUFFICIENT_STOCK",
