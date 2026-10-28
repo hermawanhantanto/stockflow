@@ -24,3 +24,16 @@ export interface ProductsResponse {
   limit: number
   total: number
 }
+
+export type StockMovementType = 'in' | 'out'
+
+export interface UpdateStockPayload {
+  type: StockMovementType
+  qty: number
+  note?: string
+}
+
+export interface UpdateStockResponse {
+  message: string
+  new_stock: number
+}

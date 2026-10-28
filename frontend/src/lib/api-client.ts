@@ -20,13 +20,28 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const rawError = error.response?.data?.error;
-    const message =
-      (typeof rawError === 'string' ? rawError : rawError?.message) ||
-      error.response?.data?.message ||
-      error.message ||
-      'An unexpected error occurred';
+    let message = '';
+
+    if (typeof rawError === 'string') {
+      message = rawError;
+    } else if (rawError?.code === 'INSUFFICIENT_STOCK') {
+      message = `Insufficient stock: only ${rawError.available} available`;
+    } else if (rawError?.message) {
+      message = rawError.message;
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.message) {
+      message = error.message;
+    } else {
+      message = 'An unexpected error occurred';
+    }
+
     const customError = new Error(message);
-    Object.assign(customError, { status: error.response?.status });
+    Object.assign(customError, {
+      status: error.response?.status,
+      data: error.response?.data,
+      response: error.response,
+    });
     return Promise.reject(customError);
   }
 );
