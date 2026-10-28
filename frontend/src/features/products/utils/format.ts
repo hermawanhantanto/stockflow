@@ -1,18 +1,11 @@
-/**
- * Formats a numeric amount to Indonesian Rupiah representation: e.g. "RP 1.234.567"
- */
 export function formatRupiah(amount: number): string {
   const formatted = new Intl.NumberFormat('id-ID', {
     maximumFractionDigits: 0,
   }).format(amount)
-  
+
   return `RP ${formatted}`
 }
 
-/**
- * Formats an ISO date string into relative time: e.g. "2h ago", "1d ago"
- * If null, undefined, or invalid, returns "-"
- */
 export function formatRelativeTime(dateInput: string | Date | null | undefined): string {
   if (!dateInput) {
     return '-'
@@ -58,3 +51,39 @@ export function formatRelativeTime(dateInput: string | Date | null | undefined):
   return `${diffInYears}y ago`
 }
 
+export function formatDate(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) {
+    return '-'
+  }
+
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+  if (isNaN(date.getTime())) {
+    return '-'
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date)
+}
+
+export function formatDateTime(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) {
+    return '-'
+  }
+
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput
+  if (isNaN(date.getTime())) {
+    return '-'
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date)
+}

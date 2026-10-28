@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { AlertCircle, ArrowUpDown, Loader2, RotateCcw } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { AlertCircle, ArrowUpDown, Loader2, ReceiptText, RotateCcw } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Pagination } from '@/components/common'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import { AdjustStockDialog } from './adjust-stock-dialog'
 import type { Product } from '../types/product.types'
 
 export function ProductTable() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const search = searchParams.get('search')?.trim() || undefined
   const statusParam = searchParams.get('status')?.trim()
@@ -168,16 +169,28 @@ export function ProductTable() {
                     {formatRelativeTime(product.last_movement_at)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => handleOpenAdjust(product)}
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
-                      title={`Update stock for ${product.name}`}
-                    >
-                      <ArrowUpDown className="size-4" />
-                      <span className="sr-only">Update stock for {product.name}</span>
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => navigate(`/products/${product.id}/orders`)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                        title={`View orders for ${product.name}`}
+                      >
+                        <ReceiptText className="size-4" />
+                        <span className="sr-only">View orders for {product.name}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleOpenAdjust(product)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                        title={`Update stock for ${product.name}`}
+                      >
+                        <ArrowUpDown className="size-4" />
+                        <span className="sr-only">Update stock for {product.name}</span>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

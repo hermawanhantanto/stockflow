@@ -1,3 +1,5 @@
+import type { Product } from '@/features/products/types/product.types'
+
 export interface OrderItemRequest {
   sku: string
   qty: number
@@ -30,4 +32,9 @@ export interface InsufficientStockError {
   code: 'INSUFFICIENT_STOCK'
   sku: string
   available: number
+}
+
+export interface ProductOrdersResponse {
+  product: Product
+  orders: Order[]
 }
