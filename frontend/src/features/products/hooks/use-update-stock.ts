@@ -7,9 +7,6 @@ export interface UpdateStockVariables {
   payload: UpdateStockPayload
 }
 
-/**
- * Mutation hook to adjust stock and invalidate products query on success.
- */
 export function useUpdateStock() {
   const queryClient = useQueryClient()
 

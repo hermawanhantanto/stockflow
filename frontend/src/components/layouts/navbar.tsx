@@ -12,8 +12,21 @@ export function Navbar() {
           Stockflow
         </Link>
 
-        {/* Right: Products Link */}
-        <nav className="flex items-center">
+        {/* Right: Navigation Links */}
+        <nav className="flex items-center gap-6">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `text-sm font-medium transition-colors duration-200 ${
+                isActive
+                  ? 'text-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`
+            }
+          >
+            Dashboard
+          </NavLink>
           <NavLink
             to="/products"
             className={({ isActive }) =>

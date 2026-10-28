@@ -94,7 +94,6 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
     setCreatedOrder(null)
   }
 
-  // Calculate estimated total based on catalog prices
   const estimatedTotal = React.useMemo(() => {
     return items.reduce((acc, item) => {
       const prod = products.find((p) => p.sku === item.sku)
@@ -106,7 +105,6 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
     }, 0)
   }, [items, products])
 
-  // Validation checks
   const isCustomerValid = customer.trim().length > 0
   const areItemsValid =
     items.length > 0 &&
@@ -192,7 +190,6 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
     }
   }
 
-  // --- Order Confirmed View ---
   if (createdOrder) {
     return (
       <div className="space-y-5">
@@ -279,7 +276,6 @@ function CreateOrderForm({ onClose }: { onClose: () => void }) {
     )
   }
 
-  // --- Order Form View ---
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <DialogHeader>

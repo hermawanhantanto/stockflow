@@ -1,10 +1,6 @@
 import { apiClient } from '@/lib/api-client'
 import type { UpdateStockPayload, UpdateStockResponse } from '../types/product.types'
 
-/**
- * API handler to adjust product stock.
- * Calls POST /api/products/{id}/stock
- */
 export const updateStock = async (
   productId: number,
   payload: UpdateStockPayload

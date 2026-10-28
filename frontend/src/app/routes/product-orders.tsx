@@ -21,7 +21,6 @@ import type { Order } from '@/features/orders/types/order.types'
 export function ProductOrdersRoute() {
   const { id } = useParams<{ id: string }>()
 
-  // Fetch product from catalog
   const { data: productsData, isLoading: isLoadingProducts } = useGetProducts({
     limit: 100,
     status: 'all',
@@ -30,7 +29,6 @@ export function ProductOrdersRoute() {
     return productsData?.data.find((p) => p.id === Number(id))
   }, [productsData?.data, id])
 
-  // Fetch orders associated with this product using GetOrderByID (via movements)
   const { data: orders = [], isLoading: isLoadingOrders, error } = useGetProductOrders(id)
 
   const [orderToCancel, setOrderToCancel] = React.useState<Order | null>(null)
