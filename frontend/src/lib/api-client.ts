@@ -25,7 +25,9 @@ apiClient.interceptors.response.use(
     if (typeof rawError === 'string') {
       message = rawError;
     } else if (rawError?.code === 'INSUFFICIENT_STOCK') {
-      message = `Insufficient stock: only ${rawError.available} available`;
+      message = rawError.sku
+        ? `Insufficient stock for ${rawError.sku}: only ${rawError.available} available`
+        : `Insufficient stock: only ${rawError.available} available`;
     } else if (rawError?.message) {
       message = rawError.message;
     } else if (error.response?.data?.message) {
