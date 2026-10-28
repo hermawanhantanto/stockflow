@@ -3,32 +3,17 @@ import { Search, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks'
-import { cn } from '@/lib/utils'
 
-export interface SearchBarProps
-  extends Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange'> {
-  /**
-   * Query parameter key to sync with in the URL. Defaults to 'search'.
-   */
-  paramKey?: string
-  /**
-   * Debounce delay in milliseconds. Defaults to 400ms.
-   */
-  debounceMs?: number
+export interface SearchBarProps {
+  placeholder?: string
 }
 
-export function SearchBar({
-  paramKey = 'search',
-  debounceMs = 400,
-  placeholder = 'Search...',
-  className,
-  ...props
-}: SearchBarProps) {
+export function SearchBar({ placeholder = 'Search...' }: SearchBarProps = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const urlQuery = searchParams.get(paramKey) ?? ''
+  const urlQuery = searchParams.get('search') ?? ''
   const [value, setValue] = React.useState(urlQuery)
   const [prevUrlQuery, setPrevUrlQuery] = React.useState(urlQuery)
-  const debouncedValue = useDebounce(value, debounceMs)
+  const debouncedValue = useDebounce(value, 400)
 
   if (prevUrlQuery !== urlQuery) {
     setPrevUrlQuery(urlQuery)
@@ -36,7 +21,7 @@ export function SearchBar({
   }
 
   React.useEffect(() => {
-    const currentParam = searchParams.get(paramKey) ?? ''
+    const currentParam = searchParams.get('search') ?? ''
     const trimmed = debouncedValue.trim()
 
     if (trimmed === currentParam) {
@@ -45,26 +30,26 @@ export function SearchBar({
 
     const nextParams = new URLSearchParams(searchParams)
     if (trimmed) {
-      nextParams.set(paramKey, trimmed)
+      nextParams.set('search', trimmed)
     } else {
-      nextParams.delete(paramKey)
+      nextParams.delete('search')
     }
 
     if (nextParams.has('page')) {
-      nextParams.set('page', '1')
+      nextParams.delete('page')
     }
 
     setSearchParams(nextParams, { replace: true })
-  }, [debouncedValue, paramKey, searchParams, setSearchParams])
+  }, [debouncedValue, searchParams, setSearchParams])
 
   const handleClear = () => {
     setValue('')
-    if (searchParams.has(paramKey)) {
+    if (searchParams.has('search')) {
       const nextParams = new URLSearchParams(searchParams)
-      nextParams.delete(paramKey)
+      nextParams.delete('search')
 
       if (nextParams.has('page')) {
-        nextParams.set('page', '1')
+        nextParams.delete('page')
       }
 
       setSearchParams(nextParams, { replace: true })
@@ -72,7 +57,7 @@ export function SearchBar({
   }
 
   return (
-    <div className={cn('relative flex items-center w-full', className)}>
+    <div className="relative flex items-center w-full">
       <Search className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
       <Input
         type="text"
@@ -80,7 +65,6 @@ export function SearchBar({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         className="pl-9 pr-8 h-9 bg-background"
-        {...props}
       />
       {value ? (
         <button

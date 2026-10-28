@@ -1,45 +1,27 @@
 import { useSearchParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
-export interface StatusFilterOption {
-  label: string
-  value: string
-}
-
-export interface StatusFilterProps {
-  /**
-   * The query parameter name in the URL. Defaults to 'status'.
-   */
-  paramKey?: string
-  options?: StatusFilterOption[]
-  className?: string
-}
-
-const DEFAULT_OPTIONS: StatusFilterOption[] = [
+const OPTIONS = [
   { label: 'All', value: 'all' },
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
 ]
 
-export function StatusFilter({
-  paramKey = 'status',
-  options = DEFAULT_OPTIONS,
-  className,
-}: StatusFilterProps) {
+export function StatusFilter() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const currentStatus = searchParams.get(paramKey) || 'all'
+  const currentStatus = searchParams.get('status') || 'all'
 
   const handleSelect = (value: string) => {
     const nextParams = new URLSearchParams(searchParams)
 
     if (value === 'all') {
-      nextParams.delete(paramKey)
+      nextParams.delete('status')
     } else {
-      nextParams.set(paramKey, value)
+      nextParams.set('status', value)
     }
 
     if (nextParams.has('page')) {
-      nextParams.set('page', '1')
+      nextParams.delete('page')
     }
 
     setSearchParams(nextParams, { replace: true })
@@ -47,14 +29,11 @@ export function StatusFilter({
 
   return (
     <div
-      className={cn(
-        'inline-flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground border border-border/50',
-        className
-      )}
+      className="inline-flex h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground border border-border/50"
       role="group"
       aria-label="Filter by status"
     >
-      {options.map((option) => {
+      {OPTIONS.map((option) => {
         const isSelected = currentStatus.toLowerCase() === option.value.toLowerCase()
         return (
           <button

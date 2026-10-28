@@ -1,5 +1,6 @@
 import { AlertCircle, Loader2, MoreHorizontal, RotateCcw } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { Pagination } from '@/components/common'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,26 +15,25 @@ import { cn } from '@/lib/utils'
 import { useGetProducts } from '../hooks/use-get-products'
 import { formatRelativeTime, formatRupiah } from '../utils/format'
 
-export interface ProductTableProps {
-  /**
-   * Optional search filter override. If omitted, uses URL ?search= query param.
-   */
-  search?: string
-  /**
-   * Optional status filter override. If omitted, uses URL ?status= query param.
-   */
-  status?: string
-}
-
-export function ProductTable({ search: customSearch, status: customStatus }: ProductTableProps = {}) {
+export function ProductTable() {
   const [searchParams] = useSearchParams()
-  const search = customSearch ?? (searchParams.get('search')?.trim() || undefined)
-  const statusParam = customStatus ?? searchParams.get('status')?.trim()
+  const search = searchParams.get('search')?.trim() || undefined
+  const statusParam = searchParams.get('status')?.trim()
   const status = statusParam && statusParam !== 'all' ? statusParam : undefined
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts({ search, status })
+  const pageParam = parseInt(searchParams.get('page') || '1', 10)
+  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
+  const limit = 10
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts({
+    search,
+    status,
+    page,
+    limit,
+  })
 
   const products = data?.data ?? []
+  const total = data?.total ?? 0
 
   return (
     <div className="rounded-lg border border-border bg-card shadow-xs overflow-hidden">
@@ -171,6 +171,16 @@ export function ProductTable({ search: customSearch, status: customStatus }: Pro
           )}
         </TableBody>
       </Table>
+
+      {!isLoading && !isError && products.length > 0 && (
+        <div className="border-t border-border px-4 py-3 sm:px-6 bg-card">
+          <Pagination
+            page={page}
+            limit={limit}
+            total={total}
+          />
+        </div>
+      )}
     </div>
   )
 }
