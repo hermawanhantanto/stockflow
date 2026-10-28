@@ -8,9 +8,7 @@ export function useCancelOrder() {
   return useMutation<Order, Error, number | string>({
     mutationFn: (orderId) => cancelOrder(orderId),
     onSuccess: () => {
-      // Invalidate products query to visibly restore stock in the products catalog
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      // Invalidate current product orders query
       queryClient.invalidateQueries({ queryKey: ['product-orders'] })
     },
   })

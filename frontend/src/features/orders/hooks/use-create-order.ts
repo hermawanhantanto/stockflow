@@ -8,7 +8,6 @@ export function useCreateOrder() {
   return useMutation<Order, Error, CreateOrderRequest>({
     mutationFn: createOrder,
     onSuccess: () => {
-      // Refresh products table to reflect deducted stock and new movements
       queryClient.invalidateQueries({ queryKey: ['products'] })
     },
   })
