@@ -19,7 +19,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
-    return Promise.reject(new Error(message));
+    const rawError = error.response?.data?.error;
+    const message =
+      (typeof rawError === 'string' ? rawError : rawError?.message) ||
+      error.response?.data?.message ||
+      error.message ||
+      'An unexpected error occurred';
+    const customError = new Error(message);
+    Object.assign(customError, { status: error.response?.status });
+    return Promise.reject(customError);
   }
 );
