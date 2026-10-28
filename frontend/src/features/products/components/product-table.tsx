@@ -1,4 +1,5 @@
 import { AlertCircle, Loader2, MoreHorizontal, RotateCcw } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,8 +14,18 @@ import { cn } from '@/lib/utils'
 import { useGetProducts } from '../hooks/use-get-products'
 import { formatRelativeTime, formatRupiah } from '../utils/format'
 
-export function ProductTable() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts()
+export interface ProductTableProps {
+  /**
+   * Optional search filter override. If omitted, uses URL ?search= query param.
+   */
+  search?: string
+}
+
+export function ProductTable({ search: customSearch }: ProductTableProps = {}) {
+  const [searchParams] = useSearchParams()
+  const search = customSearch ?? (searchParams.get('search')?.trim() || undefined)
+
+  const { data, isLoading, isError, error, refetch, isFetching } = useGetProducts({ search })
 
   const products = data?.data ?? []
 
@@ -82,7 +93,13 @@ export function ProductTable() {
                 colSpan={7}
                 className="h-32 text-center text-sm text-muted-foreground"
               >
-                No products available yet.
+                {search ? (
+                  <span>
+                    No products found matching <span className="font-medium text-foreground">"{search}"</span>.
+                  </span>
+                ) : (
+                  'No products available yet.'
+                )}
               </TableCell>
             </TableRow>
           ) : (
